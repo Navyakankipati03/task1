@@ -26,7 +26,51 @@ jobs:
         run: |
           curl -X POST -H "Content-Type: application/json" \
           -d '{
-                "title": "🚨 Build Failed - AppConfig Missing",
-                "text": "Spring Boot failed to start due to missing configuration keys."
-              }' \
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "text": "🚨 Build Failed – AppConfig Missing",
+                      "weight": "Bolder",
+                      "size": "Large",
+                      "color": "Attention"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "Spring Boot application failed to start due to missing configuration keys.",
+                      "wrap": true
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        {
+                          "title": "Repository:",
+                          "value": "${{ github.repository }}"
+                        },
+                        {
+                          "title": "Branch:",
+                          "value": "${{ github.ref_name }}"
+                        },
+                        {
+                          "title": "Workflow:",
+                          "value": "Spring Boot Config Validation"
+                        },
+                        {
+                          "title": "Status:",
+                          "value": "FAILED"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }' \
           ${{ secrets.TEAMS_WEBHOOK_URL }}
