@@ -24,7 +24,8 @@ jobs:
       - name: Notify Microsoft Teams on config failure
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: application/json" \
+          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
           -d '{
             "type": "message",
             "attachments": [
@@ -59,10 +60,6 @@ jobs:
                           "value": "${{ github.ref_name }}"
                         },
                         {
-                          "title": "Workflow:",
-                          "value": "Spring Boot Config Validation"
-                        },
-                        {
                           "title": "Status:",
                           "value": "FAILED"
                         }
@@ -72,5 +69,4 @@ jobs:
                 }
               }
             ]
-          }' \
-          ${{ secrets.TEAMS_WEBHOOK_URL }}
+          }'
