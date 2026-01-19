@@ -11,17 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build application
-        run: mvn clean package
+      - name: Validate config by starting app
+        run: mvn spring-boot:run
 
       - name: Notify Microsoft Teams on config failure
         if: failure()
@@ -29,6 +27,6 @@ jobs:
           curl -X POST -H "Content-Type: application/json" \
           -d '{
                 "title": "🚨 Build Failed - AppConfig Missing",
-                "text": "Spring Boot build failed due to missing application configuration keys. Please fix application.yml before merging."
+                "text": "Spring Boot failed to start due to missing configuration keys."
               }' \
           ${{ secrets.TEAMS_WEBHOOK_URL }}
