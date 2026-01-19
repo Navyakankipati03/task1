@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Validate config by starting app
-        run: mvn spring-boot:run
+        run: mvn spring-boot:run -Dspring-boot.run.arguments="--spring.main.web-application-type=none"
 
       - name: Notify Microsoft Teams on Success
         if: success()
