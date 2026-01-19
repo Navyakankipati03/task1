@@ -21,7 +21,48 @@ jobs:
       - name: Validate config by starting app
         run: mvn spring-boot:run
 
-      - name: Notify Microsoft Teams on config failure
+      - name: Notify Microsoft Teams on Success
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "text": "✅ Build Passed – Config Validated",
+                      "weight": "Bolder",
+                      "size": "Large",
+                      "color": "Good"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "Spring Boot application started successfully. All required configurations are present.",
+                      "wrap": true
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        { "title": "Repository:", "value": "${{ github.repository }}" },
+                        { "title": "Branch:", "value": "${{ github.ref_name }}" },
+                        { "title": "Status:", "value": "SUCCESS" }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }'
+
+      - name: Notify Microsoft Teams on Failure
         if: failure()
         run: |
           curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
@@ -45,24 +86,15 @@ jobs:
                     },
                     {
                       "type": "TextBlock",
-                      "text": "Spring Boot application failed to start due to missing configuration keys.",
+                      "text": "Spring Boot application failed to start. Please check AppConfig for missing keys.",
                       "wrap": true
                     },
                     {
                       "type": "FactSet",
                       "facts": [
-                        {
-                          "title": "Repository:",
-                          "value": "${{ github.repository }}"
-                        },
-                        {
-                          "title": "Branch:",
-                          "value": "${{ github.ref_name }}"
-                        },
-                        {
-                          "title": "Status:",
-                          "value": "FAILED"
-                        }
+                        { "title": "Repository:", "value": "${{ github.repository }}" },
+                        { "title": "Branch:", "value": "${{ github.ref_name }}" },
+                        { "title": "Status:", "value": "FAILED" }
                       ]
                     }
                   ]
