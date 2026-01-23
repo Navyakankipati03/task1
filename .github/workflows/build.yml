@@ -7,98 +7,13 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Validate config by starting app
-        run: mvn spring-boot:run -Dspring-boot.run.arguments="--spring.main.web-application-type=none"
-
-      - name: Notify Microsoft Teams on Success
-        if: success()
-        run: |
-          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.4",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "text": "✅ Build Passed – Config Validated",
-                      "weight": "Bolder",
-                      "size": "Large",
-                      "color": "Good"
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": "Spring Boot application started successfully. All required configurations are present.",
-                      "wrap": true
-                    },
-                    {
-                      "type": "FactSet",
-                      "facts": [
-                        { "title": "Repository:", "value": "${{ github.repository }}" },
-                        { "title": "Branch:", "value": "${{ github.ref_name }}" },
-                        { "title": "Status:", "value": "SUCCESS" }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }'
-
-      - name: Notify Microsoft Teams on Failure
-        if: failure()
-        run: |
-          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.4",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "text": "🚨 Build Failed – AppConfig Missing",
-                      "weight": "Bolder",
-                      "size": "Large",
-                      "color": "Attention"
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": "Spring Boot application failed to start. Please check AppConfig for missing keys.",
-                      "wrap": true
-                    },
-                    {
-                      "type": "FactSet",
-                      "facts": [
-                        { "title": "Repository:", "value": "${{ github.repository }}" },
-                        { "title": "Branch:", "value": "${{ github.ref_name }}" },
-                        { "title": "Status:", "value": "FAILED" }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }'
+  run-centralized-build:
+    # Replace with your actual org/repo path to the master template
+    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/master-build.yml@main
+    with:
+      project_name: "Spring-Boot-App-Config-Check"
+      java-version: "17"
+      # We chain the standard compile and the config validation here
+      build_command: "mvn clean compile spring-boot:run -Dspring-boot.run.arguments='--spring.main.web-application-type=none'"
+    secrets:
+      WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
