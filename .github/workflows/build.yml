@@ -8,12 +8,34 @@ on:
 
 jobs:
   run-centralized-build:
-    # Replace with your actual org/repo path to the master template
     uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/java-build-template.yml@main
     with:
       project_name: "Spring-Boot-App-Config-Check"
       java-version: "17"
-      # We chain the standard compile and the config validation here
       build_command: "mvn clean compile spring-boot:run -Dspring-boot.run.arguments='--spring.main.web-application-type=none'"
+    secrets:
+      WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # Job for Success Notification
+  notify-success:
+    needs: run-centralized-build
+    if: success()
+    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/centralized-teams-notifier.yml@main
+    with:
+      project_name: "Spring-Boot-App"
+      component_name: "Config-Validation"
+      status: "SUCCESS"
+    secrets:
+      WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  # Job for Failure Notification
+  notify-failure:
+    needs: run-centralized-build
+    if: failure()
+    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/teams-notifier.yml@main
+    with:
+      project_name: "Spring-Boot-App"
+      component_name: "Config-Validation"
+      status: "FAILURE"
     secrets:
       WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
