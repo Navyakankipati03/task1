@@ -9,7 +9,7 @@ on:
 jobs:
   run-centralized-build:
     # Replace with your actual org/repo path to the master template
-    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/master-build.yml@main
+    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/java-build-template.yml@main
     with:
       project_name: "Spring-Boot-App-Config-Check"
       java-version: "17"
