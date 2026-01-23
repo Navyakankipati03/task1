@@ -20,7 +20,7 @@ jobs:
   notify-success:
     needs: run-centralized-build
     if: success()
-    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/centralized-teams-notifier.yml@main
+    uses: Bhuvaneshwaran-17/central-devops-tooling/.github/workflows/teams-notifier.yml@main
     with:
       project_name: "Spring-Boot-App"
       component_name: "Config-Validation"
